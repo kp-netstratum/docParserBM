@@ -1,0 +1,202 @@
+
+.chatbot-container {
+  max-width: 600px;
+  min-width: 500px;
+  min-height: 700px;
+  margin: 20px auto;
+  border: 1px solid #ddd;
+  border-radius: 8px;
+  height: 500px;
+  display: flex;
+  color: #333;
+  flex-direction: column;
+  box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+}
+
+.chatbot-header {
+  padding: 15px;
+  border-bottom: 1px solid #eee;
+  background-color: #f9f9f9;
+  border-radius: 8px 8px 0 0;
+}
+
+.chatbot-title {
+  margin: 0;
+  color: #007bff;
+}
+
+.chatbot-messages {
+  flex: 1;
+  padding: 15px;
+  overflow-y: auto;
+  background-color: #fff;
+}
+
+.message-container {
+  margin-bottom: 15px;
+  display: flex;
+}
+
+.message-container.user {
+  justify-content: flex-end;
+}
+
+.message-container.assistant {
+  justify-content: flex-start;
+}
+
+.message-bubble {
+  max-width: 70%;
+  padding: 10px 15px;
+  border-radius: 18px;
+  white-space: pre-wrap;
+}
+
+.message-bubble.user {
+  background-color: #007bff;
+  color: white;
+}
+
+.message-bubble.assistant {
+  background-color: #f1f1f1;
+  color: black;
+}
+
+.message-bubble.audio {
+  min-width: 50%;
+}
+
+.message-bubble.streaming {
+  border: 2px solid #007bff;
+}
+
+.message-content {
+  margin: 0 0 10px 0;
+}
+
+.message-audio {
+  width: 100%;
+}
+
+.message-image {
+  max-width: 100%;
+  border-radius: 8px;
+}
+
+.typing-indicator {
+  margin-top: 5px;
+  font-size: 12px;
+  color: #666;
+}
+
+.loading-text {
+  text-align: center;
+  color: #666;
+}
+
+.chatbot-input {
+  padding: 15px;
+  border-top: 1px solid #eee;
+  background-color: #f9f9f9;
+  border-radius: 0 0 8px 8px;
+}
+
+.recording-controls {
+  margin-bottom: 10px;
+  display: flex;
+  align-items: center;
+  gap: 10px;
+}
+
+.record-button {
+  padding: 10px 15px;
+  color: white;
+  border: none;
+  border-radius: 50px;
+  cursor: pointer;
+  display: flex;
+  align-items: center;
+  gap: 5px;
+}
+
+.record-button.recording {
+  background-color: #dc3545;
+}
+
+.record-button.idle {
+  background-color: #28a745;
+}
+
+.record-button:disabled {
+  cursor: not-allowed;
+}
+
+.recording-duration {
+  color: #dc3545;
+  font-weight: bold;
+}
+
+.file-input-label {
+  font-size: 12px;
+  color: #666;
+  margin-bottom: 10px;
+}
+
+.file-input {
+  width: 100%;
+  padding: 8px;
+  margin-bottom: 10px;
+}
+
+.selected-file {
+  margin-bottom: 10px;
+  font-size: 14px;
+  color: #333;
+}
+
+.remove-file-button {
+  margin-left: 10px;
+  padding: 2px 8px;
+  background-color: #dc3545;
+  color: white;
+  border: none;
+  border-radius: 4px;
+  cursor: pointer;
+  font-size: 12px;
+}
+
+.text-input-container {
+  display: flex;
+  gap: 10px;
+}
+
+.text-input {
+  flex: 1;
+  padding: 10px;
+  border: 1px solid #ddd;
+  border-radius: 4px;
+  resize: none;
+  height: 40px;
+}
+
+.send-button {
+  padding: 10px 20px;
+  color: white;
+  border: none;
+  border-radius: 4px;
+  cursor: pointer;
+}
+
+.send-button.enabled {
+  background-color: #007bff;
+}
+
+.send-button.disabled {
+  background-color: #ccc;
+  cursor: not-allowed;
+}
+
+.send-button.full-width {
+  width: 100%;
+  padding: 10px;
+}

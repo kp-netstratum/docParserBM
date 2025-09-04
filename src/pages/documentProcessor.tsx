@@ -1,5 +1,6 @@
 /* eslint-disable @typescript-eslint/no-explicit-any */
 import React, { useRef, useState } from "react";
+import FileIcon from "../components/fileIcon";
 import { useNavigate } from "react-router-dom";
 
 interface StreamingCallback {
@@ -84,6 +85,8 @@ export const DocumentProcessor = ({ onUploaded, setFileData }: any) => {
   const inputRef = useRef<HTMLInputElement | null>(null);
   const navigate = useNavigate();
   const [loading, setLoading] = useState(false);
+
+  // console.log("Files:", files);
 
   const getExecutePipeline = async (
     textInput: string,
@@ -263,8 +266,9 @@ export const DocumentProcessor = ({ onUploaded, setFileData }: any) => {
                             key={index}
                             className="text-sm bg-slate-300 p-2 rounded-md text-black flex justify-between items-center"
                           >
-                            <div className="text-sm flex justify-start">
-                              {file.name}
+                            <div className="text-sm flex justify-start items-center gap-2">
+                              <FileIcon name={file.name} type={file.type} />
+                              <span>{file.name}</span>
                             </div>
                             <div onClick={(e) => {
                               e.stopPropagation();
@@ -310,7 +314,7 @@ export const DocumentProcessor = ({ onUploaded, setFileData }: any) => {
             </button>
             <button
               type="button"
-              // onClick={handleSubmit}
+              onClick={handleSubmit}
               className="flex justify-center px-4 py-2 bg-gradient-to-l from-violet-500 to-violet-500 rounded-md w-[100px] text-center cursor-pointer hover:bg-gradient-to-lb hover:to-blue-800 hover:from-violet-500 transition-colors  duration-500 ease-in-out "
               disabled={files.length === 0 || isUploading || loading}
             >

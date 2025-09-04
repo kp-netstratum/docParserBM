@@ -1,14 +1,17 @@
+/* eslint-disable @typescript-eslint/no-explicit-any */
 import { BrowserRouter, Route, Routes } from "react-router-dom";
-import { Main } from "./pages/main";
 import { useState } from "react";
 import { Analysis } from "./pages/analysis";
-import ChatBot from "./components/test";
+import { DashBoard } from "./pages/dashBoard";
+import { DocProcessor } from "./components/docProcessor";
 
 function App() {
   const [uploadResult, setUploadResult] = useState<any | null>(null);
-  const [fileData, setFileData] = useState<any>(null);
+  const [fileDataMain, setFileDataMain] = useState<any>(null);
+  const [docList, setDocList] = useState<any>([]);
+  const [appForm, setAppForm] = useState<any>();
 
-  console.log("App uploadResult:", uploadResult);
+  console.log("App uploadResult:", docList);
 
   return (
     <div className="h-[100vh] w-[100vw] bg-slate-950 text-white">
@@ -16,21 +19,24 @@ function App() {
         <Routes>
           <Route
             path="/"
+            element={<DashBoard SetDocs={setDocList} setAppForm={setAppForm} />}
+          />
+          <Route
+            path="/docs"
             element={
-              <Main
-                onUploaded={(res:any) => setUploadResult(res)}
-                fileData={fileData}
-                setFileData={setFileData}
+              <DocProcessor
+                FileJson={docList}
+                setResult={setUploadResult}
+                setFileDataMain={setFileDataMain}
               />
             }
           />
           <Route
             path="/analysis"
             element={
-              <Analysis data={uploadResult ?? null} fileData={fileData} />
+              <Analysis data={uploadResult ?? null} fileData={fileDataMain} appForm={appForm}/>
             }
           />
-        <Route path="/test" element={<ChatBot/>} />
         </Routes>
       </BrowserRouter>
     </div>

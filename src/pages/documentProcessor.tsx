@@ -1,17 +1,16 @@
 /* eslint-disable @typescript-eslint/no-explicit-any */
 import React, { useRef, useState } from "react";
-import { useNavigate } from "react-router-dom";
+// import { useNavigate } from "react-router-dom";
 
-
-export const DocumentProcessor = ({ onUploaded, setFileData, Data }: any) => {
+export const DocumentProcessor = ({ setFileData, Data }: any) => {
   const [file, setFile] = useState<File | null>(null);
-  const [isUploading, setIsUploading] = useState(false);
+  // const [isUploading, setIsUploading] = useState(false);
   const [error, setError] = useState<string | null>(null);
   // const [result, setResult] = useState<any | null>(null);
   const [isDragging, setIsDragging] = useState(false);
   const inputRef = useRef<HTMLInputElement | null>(null);
-  const navigate = useNavigate();
-  const [loading, setLoading] = useState(false);
+  // const navigate = useNavigate();
+  // const [loading, setLoading] = useState(false);
 
   // console.log(error, result);
 
@@ -32,8 +31,6 @@ export const DocumentProcessor = ({ onUploaded, setFileData, Data }: any) => {
   //     setResult(res);
   //     onUploaded(res);
   //   };
-
-
 
   function handleFileChange(e: React.ChangeEvent<HTMLInputElement>) {
     const selected = e.target.files?.[0] ?? null;
@@ -66,6 +63,10 @@ export const DocumentProcessor = ({ onUploaded, setFileData, Data }: any) => {
 
   function handleBrowseClick() {
     inputRef.current?.click();
+  }
+
+  function handleRemoveFile() {
+    setFile(null);
   }
 
   const dropzoneStyle: React.CSSProperties = {
@@ -102,7 +103,13 @@ export const DocumentProcessor = ({ onUploaded, setFileData, Data }: any) => {
           </button>
         </div>
       )}
-      <div className="bg-slate-800 p-6 rounded-lg flex flex-col items-center gap-4 w-full relative z-10 border border-slate-700">
+      <div
+        className={`bg-slate-800 p-6 rounded-lg flex flex-col items-center gap-4 w-full relative z-10 border ${
+          file
+            ? "border-green-500 shadow-green-500 shadow-lg"
+            : "border-slate-700"
+        }`}
+      >
         <div className="text-center flex flex-col gap-2">
           <div className="text-3xl font-bold">{Data.fileName}</div>
         </div>
@@ -124,10 +131,35 @@ export const DocumentProcessor = ({ onUploaded, setFileData, Data }: any) => {
             >
               <div>
                 {file ? (
-                  <>
+                  <div className="flex justify-between items-center">
                     <div style={{ fontWeight: 600 }}>{file.name}</div>
-                    <div style={helperTextStyle}>Ready to upload</div>
-                  </>
+                    <div>
+                      <div className="flex">
+                        <div
+                          onClick={(e) => {
+                            e.stopPropagation();
+                            handleRemoveFile();
+                          }}
+                        >
+                          <svg
+                            xmlns="http://www.w3.org/2000/svg"
+                            width="24"
+                            height="24"
+                            viewBox="0 0 24 24"
+                            fill="none"
+                            stroke="#fb4646"
+                            stroke-width="2"
+                            stroke-linecap="round"
+                            stroke-linejoin="round"
+                            className="lucide lucide-x-icon lucide-x"
+                          >
+                            <path d="M18 6 6 18" />
+                            <path d="m6 6 12 12" />
+                          </svg>
+                        </div>
+                      </div>
+                    </div>
+                  </div>
                 ) : (
                   <>
                     <div style={{ fontWeight: 600 }}>Drop your file here</div>
@@ -137,6 +169,18 @@ export const DocumentProcessor = ({ onUploaded, setFileData, Data }: any) => {
               </div>
             </div>
           </div>
+          {/* {file && (
+            <div className="pt-4 flex">
+              <button
+                type="button"
+                onClick={handleRemoveFile}
+                className="px-3 py-2 bg-slate-600 rounded-md text-center cursor-pointer border border-slate-600 hover:border-red-500 hover:bg-slate-800 transition-colors duration-300 ease-in-out"
+                aria-label="Remove selected file"
+              >
+                Remove file
+              </button>
+            </div>
+          )} */}
           {/* <div className="pt-5 flex gap-4">
             <button
               type="button"
@@ -160,7 +204,7 @@ export const DocumentProcessor = ({ onUploaded, setFileData, Data }: any) => {
           </div> */}
         </form>
         {/* Loader below the form */}
-        {(isUploading || loading) && (
+        {/* {(isUploading || loading) && (
           <div className="flex justify-center items-center mt-4">
             <svg
               className="animate-spin h-8 w-8 text-violet-500"
@@ -184,7 +228,7 @@ export const DocumentProcessor = ({ onUploaded, setFileData, Data }: any) => {
             </svg>
             <span className="ml-2 text-violet-500">Processing...</span>
           </div>
-        )}
+        )} */}
       </div>
       {/* <div className="absolute w-[100px] h-[100px] bg-purple-500 rounded-full blur-[50px] scale-[2] left-0"></div>
       <div className="absolute w-[100px] h-[100px] bg-blue-500 rounded-full blur-[50px] scale-[2] right-0"></div> */}

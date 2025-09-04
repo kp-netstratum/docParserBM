@@ -168,7 +168,7 @@ export const DocProcessor = ({ FileJson, setResult, setFileDataMain }: any) => {
   return (
     <div className="w-screen flex flex-col gap-10 pt-20 justify-center items-center">
       <div className="flex justify-center w-full text-3xl font-bold">
-        Doc Processor
+        Upload all the Documents
       </div>
       <div className="flex flex-wrap w-full justify-center items-center gap-4">
         {files.map((item: any, index: number) => (

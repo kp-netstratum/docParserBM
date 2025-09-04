@@ -1,5 +1,6 @@
+/* eslint-disable @typescript-eslint/no-explicit-any */
 import { BrowserRouter, Route, Routes } from "react-router-dom";
-import { Main } from "./pages/main";
+import { DocumentProcessor } from "./pages/documentProcessor";
 import { useState } from "react";
 import { Analysis } from "./pages/analysis";
 import ChatBot from "./components/test";
@@ -17,7 +18,7 @@ function App() {
           <Route
             path="/"
             element={
-              <Main
+              <DocumentProcessor
                 onUploaded={(res:any) => setUploadResult(res)}
                 fileData={fileData}
                 setFileData={setFileData}

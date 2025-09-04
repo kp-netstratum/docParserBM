@@ -1,3 +1,4 @@
+/* eslint-disable @typescript-eslint/no-explicit-any */
 import React, { useRef, useState } from "react";
 import { useNavigate } from "react-router-dom";
 
@@ -75,35 +76,14 @@ async function handleExecutionStreaming(
   return readStream();
 }
 
-export const Main = ({ onUploaded, setFileData }: any) => {
-  const [file, setFile] = useState<File | null>(null);
+export const DocumentProcessor = ({ onUploaded, setFileData }: any) => {
+  const [files, setFiles] = useState<File[]>([]);
   const [isUploading, setIsUploading] = useState(false);
   const [error, setError] = useState<string | null>(null);
-  const [result, setResult] = useState<any | null>(null);
   const [isDragging, setIsDragging] = useState(false);
   const inputRef = useRef<HTMLInputElement | null>(null);
   const navigate = useNavigate();
   const [loading, setLoading] = useState(false);
-
-  console.log(error, result);
-
-  //   const fetchPackets = async (
-  //     page: number = 1,
-  //     pageSize: number = 20,
-  //     data: any
-  //   ) => {
-  //     // `http://localhost:8000/upload?page=${page}&page_size=${pageSize}`
-  //     const res = await api.post<UploadResponse>(
-  //       `/upload?page=${page}&page_size=${pageSize}`,
-  //       data,
-  //       {
-  //         // baseUrl defaults to VITE_API_BASE_URL in the api helper
-  //         headers: {}, // do not set Content-Type for FormData
-  //       }
-  //     );
-  //     setResult(res);
-  //     onUploaded(res);
-  //   };
 
   const getExecutePipeline = async (
     textInput: string,
@@ -151,35 +131,24 @@ export const Main = ({ onUploaded, setFileData }: any) => {
     if (loading || isUploading) return; // Prevent multiple submissions
     setLoading(true);
     setError(null);
-    setResult(null);
-    if (!file) return;
-    setFileData(file);
+    if (files.length === 0) return;
+    setFileData(files);
     try {
       setIsUploading(true);
-      const formData = new FormData();
-      formData.append("file", file);
-      const PassportData = {
-        surname: "Doe",
-        givenName: "John",
-        age: 30,
-        dateOfBirth: "1993-01-01",
-        placeOfBirth: "USA",
-        passportNumber: "X1234567",
-        issueDate: "2020-01-01",
-        expiryDate: "2030-01-01",
-        issuingCountry: "USA",
-        sex: "M",
-        type: "P",
-        code: "USA",
-      };
-      onUploaded(PassportData);
-      getExecutePipeline("", file).then((res) => {
-        console.log("Pipeline result:", res);
-        const parsedData = JSON.parse(res["outputNode-1"].raw);
-        onUploaded(parsedData);
-        setLoading(false);
-        navigate("/analysis");
-      });
+
+      // Process each file
+      const results = [];
+      for (const file of files) {
+        const result = await getExecutePipeline("", file);
+        console.log("Pipeline result for", file.name, ":", result);
+        const parsedData = JSON.parse(result["outputNode-1"].raw);
+        results.push({ fileName: file.name, data: parsedData });
+      }
+
+      // Send all results to parent component
+      onUploaded(results);
+      setLoading(false);
+      navigate("/analysis");
     } catch (err) {
       const message = err instanceof Error ? err.message : "Upload failed";
       setError(message);
@@ -190,8 +159,8 @@ export const Main = ({ onUploaded, setFileData }: any) => {
   }
 
   function handleFileChange(e: React.ChangeEvent<HTMLInputElement>) {
-    const selected = e.target.files?.[0] ?? null;
-    setFile(selected);
+    const selectedFiles = Array.from(e.target.files || []);
+    setFiles(selectedFiles);
   }
 
   function handleDragOver(e: React.DragEvent<HTMLDivElement>) {
@@ -210,12 +179,16 @@ export const Main = ({ onUploaded, setFileData }: any) => {
     e.preventDefault();
     e.stopPropagation();
     setIsDragging(false);
-    const droppedFile = e.dataTransfer.files?.[0] ?? null;
-    if (droppedFile) setFile(droppedFile);
+    const droppedFiles = Array.from(e.dataTransfer.files || []);
+    if (droppedFiles.length > 0) setFiles(droppedFiles);
   }
 
   function handleBrowseClick() {
     inputRef.current?.click();
+  }
+
+  function handleRemoveFile(fileToRemove: File) {
+    setFiles(files.filter((file) => file !== fileToRemove));
   }
 
   const dropzoneStyle: React.CSSProperties = {
@@ -227,12 +200,6 @@ export const Main = ({ onUploaded, setFileData }: any) => {
     textAlign: "center" as const,
     transition: "all 0.15s ease-in-out",
     cursor: "pointer",
-  };
-
-  const helperTextStyle: React.CSSProperties = {
-    marginTop: 8,
-    fontSize: 12,
-    color: "#6b7280",
   };
 
   function handleCloseError() {
@@ -256,7 +223,7 @@ export const Main = ({ onUploaded, setFileData }: any) => {
         <div className="text-center flex flex-col gap-2">
           <div className="text-3xl font-bold">Abhi - KYC Application</div>
           <p className="text-sm">
-            Drag and drop your document here, or click to browse
+            Drag and drop your documents here, or click to browse
           </p>
         </div>
         {/* Remove onSubmit from form */}
@@ -265,6 +232,7 @@ export const Main = ({ onUploaded, setFileData }: any) => {
             <input
               ref={inputRef}
               type="file"
+              multiple
               onChange={handleFileChange}
               style={{ display: "none" }}
             />
@@ -276,15 +244,57 @@ export const Main = ({ onUploaded, setFileData }: any) => {
               style={dropzoneStyle}
             >
               <div>
-                {file ? (
+                {files.length > 0 ? (
                   <>
-                    <div style={{ fontWeight: 600 }}>{file.name}</div>
-                    <div style={helperTextStyle}>Ready to upload</div>
+                    <div style={{ fontWeight: 600 }}>
+                      {files.length === 1
+                        ? files[0].name
+                        : `${files.length} files selected`}
+                    </div>
+                    <div>
+                      {files.length === 1
+                        ? "Ready to upload"
+                        : "Ready to upload all files"}
+                    </div>
+                    {files.length > 0 && (
+                      <div className="flex flex-col gap-1 pt-5">
+                        {files.map((file, index) => (
+                          <div
+                            key={index}
+                            className="text-sm bg-slate-300 p-2 rounded-md text-black flex justify-between items-center"
+                          >
+                            <div className="text-sm flex justify-start">
+                              {file.name}
+                            </div>
+                            <div onClick={(e) => {
+                              e.stopPropagation();
+                              handleRemoveFile(file);
+                            }}>
+                              <svg
+                                xmlns="http://www.w3.org/2000/svg"
+                                width="24"
+                                height="24"
+                                viewBox="0 0 24 24"
+                                fill="none"
+                                stroke="#fb4646"
+                                stroke-width="2"
+                                stroke-linecap="round"
+                                stroke-linejoin="round"
+                                className="lucide lucide-x-icon lucide-x"
+                              >
+                                <path d="M18 6 6 18" />
+                                <path d="m6 6 12 12" />
+                              </svg>
+                            </div>
+                          </div>
+                        ))}
+                      </div>
+                    )}
                   </>
                 ) : (
                   <>
-                    <div style={{ fontWeight: 600 }}>Drop your file here</div>
-                    <div style={helperTextStyle}>or click to browse</div>
+                    <div style={{ fontWeight: 600 }}>Drop your files here</div>
+                    <div className="text-sm">or click to browse</div>
                   </>
                 )}
               </div>
@@ -293,16 +303,16 @@ export const Main = ({ onUploaded, setFileData }: any) => {
           <div className="pt-5 flex gap-4">
             <button
               type="button"
-              onClick={() => setFile(null)}
+              onClick={() => setFiles([])}
               className="px-4 py-2 bg-slate-600 rounded-md w-[100px] text-center cursor-pointer border border-slate-600 hover:border-red-500 hover:bg-slate-800  transition-colors duration-300 ease-in-out"
             >
               Clear
             </button>
             <button
               type="button"
-              onClick={handleSubmit}
+              // onClick={handleSubmit}
               className="flex justify-center px-4 py-2 bg-gradient-to-l from-violet-500 to-violet-500 rounded-md w-[100px] text-center cursor-pointer hover:bg-gradient-to-lb hover:to-blue-800 hover:from-violet-500 transition-colors  duration-500 ease-in-out "
-              disabled={!file || isUploading || loading}
+              disabled={files.length === 0 || isUploading || loading}
             >
               {isUploading || loading ? (
                 <span className="flex items-center gap-2">Analyzing...</span>

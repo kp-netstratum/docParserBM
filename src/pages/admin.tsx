@@ -1,12 +1,23 @@
-import { useState } from "react";
+/* eslint-disable @typescript-eslint/no-explicit-any */
+import { useEffect, useState } from "react";
+import { useAppDispatch, useAppSelector } from "../store/hooks";
+import { setMainJson } from "../slices/formSlice";
+import AdminFormBuilder from "./adminFormBuilder";
 
-
-export const Admin = ({ formJson, setFormJson }: any) => {
+export const Admin = () => {
   const [showform, setShowForm] = useState(false);
   const [applications, setApplications] = useState<any[]>([]);
   const [applicationData, setApplicationData] = useState<any[]>([]);
   const [name, setName] = useState("");
   const [description, setDescription] = useState("");
+  const dispatch = useAppDispatch();
+  const mainJson = useAppSelector((s) => s.form.mainJson);
+  const [formshow, setFormshow] = useState(false);
+
+  console.log(mainJson, "1234567890");
+  useEffect(() => {
+    setApplications(mainJson);
+  }, []);
 
   return (
     <div className="text-white relative flex items-center flex-col w-screen h-screen bg-slate-900">
@@ -45,7 +56,12 @@ export const Admin = ({ formJson, setFormJson }: any) => {
                 onClick={() => {
                   setShowForm(false);
                   setApplications([...applications, { name, description }]);
-                  setFormJson([...applications, { name, description, data: [] }]);
+                  dispatch(
+                    setMainJson([
+                      ...(mainJson ?? []),
+                      { name, description, data: [] },
+                    ])
+                  );
                 }}
                 className="bg-green-500 text-white px-4 py-2 rounded mt-2 mb-4 cursor-pointer"
               >
@@ -62,7 +78,8 @@ export const Admin = ({ formJson, setFormJson }: any) => {
             className="bg-slate-800 rounded-md p-4 mb-4 flex justify-between items-center cursor-pointer hover:bg-slate-700"
             onClick={() => {
               setApplicationData([...applicationData, app]);
-              window.location.href = "/form";
+              // window.location.href = "/form";
+              setFormshow(true);
             }}
           >
             <div>
@@ -73,7 +90,8 @@ export const Admin = ({ formJson, setFormJson }: any) => {
               onClick={() => {
                 const updatedApps = applications.filter((_, i) => i !== index);
                 setApplications(updatedApps);
-                setFormJson(updatedApps);
+                const updated = (mainJson ?? []).filter((_, i) => i !== index);
+                dispatch(setMainJson(updated as any));
               }}
               className="text-red-500 cursor-pointer"
             >
@@ -82,7 +100,7 @@ export const Admin = ({ formJson, setFormJson }: any) => {
           </div>
         ))}
       </div>
-      {/* <AdminFormBuilder /> */}
+      {formshow && <div><AdminFormBuilder /></div>}
     </div>
   );
 };

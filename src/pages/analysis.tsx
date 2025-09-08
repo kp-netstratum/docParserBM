@@ -1,15 +1,31 @@
 /* eslint-disable @typescript-eslint/no-explicit-any */
 import { useState, useEffect } from "react";
+import { useAppSelector, useAppDispatch } from "../store/hooks";
+import { updateApplication } from "../slices/formSlice";
 import { Preview } from "../components/preview";
 import FileIcon from "../components/fileIcon";
 import { Analyzer } from "../components/analyzer";
 
 export const Analysis = ({ data, fileData, appForm }: any) => {
+  const dispatch = useAppDispatch();
+  const currentApplication = useAppSelector((state) => state.form.currentApplication);
+  const selectedDocuments = useAppSelector((state) => state.form.selectedDocuments);
+  
   const [openModal, setOpenModal] = useState(false);
   const [selectedFile, setSelectedFile] = useState<any>(null);
+  const [analysisResults, setAnalysisResults] = useState<any>(null);
+
+  // Save analysis results to Redux when available
+  useEffect(() => {
+    if (data && currentApplication) {
+      setAnalysisResults(data);
+      // Optionally update the application with analysis results
+      // dispatch(updateApplication({ id: currentApplication.id, data: analysisData }));
+    }
+  }, [data, currentApplication, dispatch]);
 
   // Handle escape key to close modal
-  console.log("data", data[0].fileName, fileData);
+  console.log("data", data?.[0]?.fileName, fileData);
   useEffect(() => {
     const handleEscapeKey = (event: KeyboardEvent) => {
       if (event.key === "Escape" && openModal) {
@@ -40,23 +56,34 @@ export const Analysis = ({ data, fileData, appForm }: any) => {
       closeModal();
     }
   };
-  return data ? (
+  const displayData = data || analysisResults;
+  const displayForm = appForm || currentApplication;
+  
+  return displayData ? (
     <div className=" space-y-10 flex h-[100vh] sm:flex-row flex-col bg-gradient-to-br from-[#0f172a] to-[#1e293b] overflow-auto">
+      {/* Application Info Header */}
+      {displayForm && (
+        <div className="absolute top-4 left-4 bg-slate-800 rounded-lg p-3 shadow-lg z-10">
+          <h3 className="text-white font-semibold">{displayForm.name || displayForm.fileName}</h3>
+          <p className="text-gray-300 text-sm">{displayForm.description || 'Custom Application'}</p>
+        </div>
+      )}
+      
       <div className="w-1/2 flex items-center justify-center h-full m-0 gap-4 flex-wrap">
         {/* <Preview fileData={fileData} /> */}
-        {fileData.map((file: any) => (
+        {fileData?.map((file: any) => (
           <div
             onClick={() => {
               setOpenModal(true);
               setSelectedFile(file);
             }}
             key={file.fileName}
-            className="text-white bg-slate-700 p-4 rounded-md flex w-48 items-center gap-2"
+            className="text-white bg-slate-700 hover:bg-slate-600 p-4 rounded-md flex w-48 items-center gap-2 transition-colors cursor-pointer shadow-lg hover:shadow-xl"
           >
             <FileIcon name={file.name} type={file.type} size={30}/>
             <span className="truncate">{file.name}</span>
           </div>
-        ))}
+        )) || []}
         {openModal && (
           <div
             className="fixed inset-0 bg-black bg-opacity-50 flex justify-center items-center z-50"
@@ -87,7 +114,7 @@ export const Analysis = ({ data, fileData, appForm }: any) => {
         )}
       </div>
       <div className="w-1/2">
-      <Analyzer appForm={appForm} data={data} />
+        <Analyzer appForm={displayForm} data={displayData} />
       </div>
     </div>
   ) : (

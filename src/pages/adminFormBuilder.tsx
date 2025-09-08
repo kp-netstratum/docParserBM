@@ -1,5 +1,14 @@
+/* eslint-disable @typescript-eslint/no-explicit-any */
 import { useEffect, useState } from "react";
-import type { SetStateAction, Dispatch } from "react";
+import { useAppDispatch, useAppSelector } from "../store/hooks";
+import { 
+  setMainJson, 
+  setFormBuilderData, 
+  addFormBuilderDocument, 
+  updateFormBuilderDocument, 
+  removeFormBuilderDocument 
+} from "../slices/formSlice";
+ 
 import {
   Plus,
   X,
@@ -7,8 +16,7 @@ import {
   Download,
   FileText,
   CreditCard,
-  ArrowUp,
-  ArrowDown,
+  
   GripVertical,
   Sparkles,
   Move,
@@ -59,7 +67,6 @@ interface FieldProps {
   onMoveDown: () => void;
   isFirst: boolean;
   isLast: boolean;
-  isDragging: boolean;
 }
 
 const Field: React.FC<FieldProps> = ({
@@ -67,7 +74,6 @@ const Field: React.FC<FieldProps> = ({
   fieldIndex,
   onUpdate,
   onRemove,
-  isDragging,
 }) => {
   const handleFieldChange = (property: keyof FormField) => {
     return (e: React.ChangeEvent<HTMLInputElement>) => {
@@ -163,15 +169,11 @@ const Field: React.FC<FieldProps> = ({
   );
 };
 
-interface AdminFormBuilderProps {
-  formJson: any;
-  setFormJson: Dispatch<SetStateAction<any>>;
-}
+const AdminFormBuilder: React.FC = () => {
+  const dispatch = useAppDispatch();
+  const formJson = useAppSelector((s) => s.form.mainJson);
+  const formBuilderData = useAppSelector((s) => s.form.formBuilderData);
 
-const AdminFormBuilder: React.FC<AdminFormBuilderProps> = ({
-  formJson,
-  setFormJson,
-}: any) => {
   const [documents, setDocuments] = useState<Document[]>([]);
   const [showDocumentModal, setShowDocumentModal] = useState<boolean>(false);
   const [selectedDocument, setSelectedDocument] = useState<number | null>(null);
@@ -217,10 +219,24 @@ const AdminFormBuilder: React.FC<AdminFormBuilderProps> = ({
     setJsonOutput(formJson);
   }, [formJson]);
 
+  // Sync local documents state with Redux on mount
+  // useEffect(() => {
+  //   if (formBuilderData.length > 0) {
+  //     setDocuments(formBuilderData);
+  //   }
+  // }, [formBuilderData]);
+
+  console.log(formJson, formBuilderData, formBuilderData)
+
   const addDocument = (): void => {
     if (newDocument.fileName.trim()) {
-      setDocuments([...documents, { ...newDocument }]);
-      // setFormJson.data([...documents, { ...newDocument }]);
+      const updatedDocuments = [...documents, { ...newDocument }];
+      setDocuments(updatedDocuments);
+      
+      // Dispatch to Redux for persistence
+      dispatch(addFormBuilderDocument({ ...newDocument }));
+      dispatch(setMainJson([...(formJson ?? []), { ...newDocument }] as any));
+      
       setNewDocument({
         fileName: "",
         fileType: "any",
@@ -232,7 +248,12 @@ const AdminFormBuilder: React.FC<AdminFormBuilderProps> = ({
   };
 
   const removeDocument = (index: number): void => {
-    setDocuments(documents.filter((_, i) => i !== index));
+    const updated = documents.filter((_, i) => i !== index);
+    setDocuments(updated);
+    
+    // Dispatch to Redux for persistence
+    dispatch(removeFormBuilderDocument(index));
+    dispatch(setMainJson(updated as any));
   };
 
   const openFieldBuilder = (docIndex: number): void => {
@@ -256,6 +277,12 @@ const AdminFormBuilder: React.FC<AdminFormBuilderProps> = ({
     const updatedDocuments = [...documents];
     updatedDocuments[selectedDocument].formFields.push(newField);
     setDocuments(updatedDocuments);
+    
+    // Dispatch to Redux for persistence
+    dispatch(updateFormBuilderDocument({ 
+      index: selectedDocument, 
+      data: updatedDocuments[selectedDocument] 
+    }));
   };
 
   const updateField = (
@@ -270,6 +297,12 @@ const AdminFormBuilder: React.FC<AdminFormBuilderProps> = ({
       property
     ] = value;
     setDocuments(updatedDocuments);
+    
+    // Dispatch to Redux for persistence
+    dispatch(updateFormBuilderDocument({ 
+      index: selectedDocument, 
+      data: updatedDocuments[selectedDocument] 
+    }));
   };
 
   const removeField = (fieldIndex: number): void => {
@@ -278,6 +311,12 @@ const AdminFormBuilder: React.FC<AdminFormBuilderProps> = ({
     const updatedDocuments = [...documents];
     updatedDocuments[selectedDocument].formFields.splice(fieldIndex, 1);
     setDocuments(updatedDocuments);
+    
+    // Dispatch to Redux for persistence
+    dispatch(updateFormBuilderDocument({ 
+      index: selectedDocument, 
+      data: updatedDocuments[selectedDocument] 
+    }));
   };
 
   // Move field up
@@ -312,7 +351,11 @@ const AdminFormBuilder: React.FC<AdminFormBuilderProps> = ({
     // Remove id property from formFields for clean output
     const cleanDocuments = documents.map((doc) => ({
       ...doc,
-      formFields: doc.formFields.map(({ id, ...field }) => field),
+      formFields: doc.formFields.map((field) =>
+        Object.fromEntries(
+          Object.entries(field).filter(([key]) => key !== "id")
+        ) as Omit<FormField, "id">
+      ),
     }));
     console.log("Generated JSON:", cleanDocuments, JsonOutput);
     return JSON.stringify(cleanDocuments, null, 2);
@@ -666,7 +709,6 @@ const AdminFormBuilder: React.FC<AdminFormBuilderProps> = ({
                               fieldIndex ===
                               documents[selectedDocument].formFields.length - 1
                             }
-                            isDragging={draggedFieldIndex === fieldIndex}
                           />
                         </div>
                       )

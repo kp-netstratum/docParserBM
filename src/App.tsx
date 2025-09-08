@@ -1,6 +1,9 @@
 /* eslint-disable @typescript-eslint/no-explicit-any */
 import { BrowserRouter, Route, Routes } from "react-router-dom";
 import { useState } from "react";
+import { Provider } from 'react-redux';
+import { PersistGate } from 'redux-persist/integration/react';
+import store, { persistor } from './store';
 import { Analysis } from "./pages/analysis";
 import { DashBoard } from "./pages/dashBoard";
 import { DocProcessor } from "./components/docProcessor";
@@ -13,43 +16,45 @@ function App() {
   const [docList, setDocList] = useState<any>([]);
   const [appForm, setAppForm] = useState<any>();
 
-  const [mainJson, setMainJson] = useState<any>(null);
-
-  console.log("Main Json:", mainJson);
+  
 
   return (
-    <div className="h-[100vh] w-[100vw] bg-slate-950 text-white">
-      <BrowserRouter>
-        <Routes>
-          <Route
-            path="/"
-            element={<DashBoard SetDocs={setDocList} setAppForm={setAppForm} />}
-          />
-          <Route path="/admin" element={<Admin formJson={mainJson} setFormJson={setMainJson} />} />
-          <Route path="/form" element={<AdminFormBuilder formJson={mainJson} setFormJson={setMainJson} />} />
-          <Route
-            path="/docs"
-            element={
-              <DocProcessor
-                FileJson={docList}
-                setResult={setUploadResult}
-                setFileDataMain={setFileDataMain}
+    <Provider store={store}>
+      <PersistGate loading={<div className="h-[100vh] w-[100vw] bg-slate-950 text-white flex items-center justify-center">Loading...</div>} persistor={persistor}>
+        <div className="h-[100vh] w-[100vw] bg-slate-950 text-white">
+          <BrowserRouter>
+            <Routes>
+              <Route
+                path="/"
+                element={<DashBoard SetDocs={setDocList} setAppForm={setAppForm} />}
               />
-            }
-          />
-          <Route
-            path="/analysis"
-            element={
-              <Analysis
-                data={uploadResult ?? null}
-                fileData={fileDataMain}
-                appForm={appForm}
+              <Route path="/admin" element={<Admin />} />
+              <Route path="/form" element={<AdminFormBuilder />} />
+              <Route
+                path="/docs"
+                element={
+                  <DocProcessor
+                    FileJson={docList}
+                    setResult={setUploadResult}
+                    setFileDataMain={setFileDataMain}
+                  />
+                }
               />
-            }
-          />
-        </Routes>
-      </BrowserRouter>
-    </div>
+              <Route
+                path="/analysis"
+                element={
+                  <Analysis
+                    data={uploadResult ?? null}
+                    fileData={fileDataMain}
+                    appForm={appForm}
+                  />
+                }
+              />
+            </Routes>
+          </BrowserRouter>
+        </div>
+      </PersistGate>
+    </Provider>
   );
 }
 

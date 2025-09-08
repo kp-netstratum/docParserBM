@@ -82,7 +82,7 @@ const Field: React.FC<FieldProps> = ({
   };
 
   return (
-    <div className="bg-white border border-gray-200 rounded-lg p-4 mb-4">
+    <div className="bg-white border border-gray-200 rounded-lg p-4 mb-4 text-black">
       <div className="flex items-start gap-3">
         {/* Drag handle on the left */}
         <div className="flex flex-col justify-center items-center mr-2 cursor-move text-gray-400 hover:text-gray-600">
@@ -171,7 +171,6 @@ const Field: React.FC<FieldProps> = ({
 const AdminFormBuilder: React.FC = ({selectedForm, setSelectedForm}:any) => {
   const dispatch = useAppDispatch();
   const formJson = useAppSelector((s) => s.form.mainJson);
-  const formBuilderData = useAppSelector((s) => s.form.formBuilderData);
 
   const [documents, setDocuments] = useState<Document[]>([]);
   const [showDocumentModal, setShowDocumentModal] = useState<boolean>(false);
@@ -181,6 +180,20 @@ const AdminFormBuilder: React.FC = ({selectedForm, setSelectedForm}:any) => {
     null
   );
   const [dropTargetIndex, setDropTargetIndex] = useState<number | null>(null);
+
+  // Initialize documents from selectedForm.data
+  useEffect(() => {
+    if (selectedForm && selectedForm.data && Array.isArray(selectedForm.data)) {
+      // Create deep copies to avoid mutation issues
+      const documentsWithCopies = selectedForm.data.map((doc: Document) => ({
+        ...doc,
+        formFields: doc.formFields ? doc.formFields.map((field: FormField) => ({ ...field })) : []
+      }));
+      setDocuments(documentsWithCopies);
+    } else {
+      setDocuments([]);
+    }
+  }, [selectedForm]);
 
   // Field types available
   const fieldTypes: FieldType[] = [
@@ -212,29 +225,30 @@ const AdminFormBuilder: React.FC = ({selectedForm, setSelectedForm}:any) => {
     formFields: [],
   });
 
-  // const [JsonOutput, setJsonOutput] = useState<any>([]);
+  // Update Redux whenever documents change
+  const updateReduxState = (updatedDocuments: Document[]) => {
+    // Update selectedForm with new data
+    const updatedSelectedForm = {
+      ...selectedForm,
+      data: updatedDocuments
+    };
+    setSelectedForm(updatedSelectedForm);
 
-  // useEffect(() => {
-  //   setJsonOutput(formJson);
-  // }, [formJson]);
+    // Update the mainJson in Redux
+    const updatedMainJson = formJson?.map((item: any) => 
+      item.name === selectedForm.name && item.description === selectedForm.description 
+        ? updatedSelectedForm 
+        : item
+    ) || [];
 
-  // Sync local documents state with Redux on mount
-  // useEffect(() => {
-  //   if (formBuilderData.length > 0) {
-  //     setDocuments(formBuilderData);
-  //   }
-  // }, [formBuilderData]);
-
-  console.log(formJson, formBuilderData, formBuilderData, selectedForm, '1234567890')
+    dispatch(setMainJson(updatedMainJson));
+  };
 
   const addDocument = (): void => {
     if (newDocument.fileName.trim()) {
       const updatedDocuments = [...documents, { ...newDocument }];
       setDocuments(updatedDocuments);
-      
-      // Dispatch to Redux for persistence
-      // dispatch(addFormBuilderDocument({ ...newDocument }));
-      // dispatch(setMainJson([...(formJson ?? []), { ...newDocument }] as any));
+      updateReduxState(updatedDocuments);
       
       setNewDocument({
         fileName: "",
@@ -249,10 +263,7 @@ const AdminFormBuilder: React.FC = ({selectedForm, setSelectedForm}:any) => {
   const removeDocument = (index: number): void => {
     const updated = documents.filter((_, i) => i !== index);
     setDocuments(updated);
-    
-    // Dispatch to Redux for persistence
-    dispatch(removeFormBuilderDocument(index));
-    dispatch(setMainJson(updated as any));
+    updateReduxState(updated);
   };
 
   const openFieldBuilder = (docIndex: number): void => {
@@ -276,12 +287,7 @@ const AdminFormBuilder: React.FC = ({selectedForm, setSelectedForm}:any) => {
     const updatedDocuments = [...documents];
     updatedDocuments[selectedDocument].formFields.push(newField);
     setDocuments(updatedDocuments);
-    
-    // Dispatch to Redux for persistence
-    dispatch(updateFormBuilderDocument({ 
-      index: selectedDocument, 
-      data: updatedDocuments[selectedDocument] 
-    }));
+    updateReduxState(updatedDocuments);
   };
 
   const updateField = (
@@ -296,12 +302,7 @@ const AdminFormBuilder: React.FC = ({selectedForm, setSelectedForm}:any) => {
       property
     ] = value;
     setDocuments(updatedDocuments);
-    
-    // Dispatch to Redux for persistence
-    dispatch(updateFormBuilderDocument({ 
-      index: selectedDocument, 
-      data: updatedDocuments[selectedDocument] 
-    }));
+    updateReduxState(updatedDocuments);
   };
 
   const removeField = (fieldIndex: number): void => {
@@ -310,12 +311,7 @@ const AdminFormBuilder: React.FC = ({selectedForm, setSelectedForm}:any) => {
     const updatedDocuments = [...documents];
     updatedDocuments[selectedDocument].formFields.splice(fieldIndex, 1);
     setDocuments(updatedDocuments);
-    
-    // Dispatch to Redux for persistence
-    dispatch(updateFormBuilderDocument({ 
-      index: selectedDocument, 
-      data: updatedDocuments[selectedDocument] 
-    }));
+    updateReduxState(updatedDocuments);
   };
 
   // Move field up
@@ -328,6 +324,7 @@ const AdminFormBuilder: React.FC = ({selectedForm, setSelectedForm}:any) => {
       fields[fieldIndex - 1],
     ];
     setDocuments(updatedDocuments);
+    updateReduxState(updatedDocuments);
   };
 
   // Move field down
@@ -344,6 +341,7 @@ const AdminFormBuilder: React.FC = ({selectedForm, setSelectedForm}:any) => {
       updatedDocuments[selectedDocument].formFields[fieldIndex],
     ];
     setDocuments(updatedDocuments);
+    updateReduxState(updatedDocuments);
   };
 
   const generateJSON = (): string => {
@@ -356,10 +354,7 @@ const AdminFormBuilder: React.FC = ({selectedForm, setSelectedForm}:any) => {
         ) as Omit<FormField, "id">
       ),
     }));
-    const data = selectedForm
-    data.data = cleanDocuments
-    console.log(data, '22222222222222')
-    setSelectedForm(data)
+    
     return JSON.stringify(cleanDocuments, null, 2);
   };
 
@@ -429,12 +424,13 @@ const AdminFormBuilder: React.FC = ({selectedForm, setSelectedForm}:any) => {
     const [removed] = fields.splice(draggedFieldIndex, 1);
     fields.splice(dropIndex, 0, removed);
     setDocuments(updatedDocuments);
+    updateReduxState(updatedDocuments);
     setDraggedFieldIndex(null);
     setDropTargetIndex(null);
   };
 
   return (
-    <div className="min-h-screen bg-gradient-to-br from-slate-900 to-blue-900 relative overflow-hidden w-full">
+    <div className="min-h-screen bg-gradient-to-br from-slate-900 to-blue-900 relative overflow-hidden w-full text-black">
       <div className="relative z-10 p-6">
         <div className="max-w-7xl mx-auto flex flex-col items-center text-center my-12">
           <div className="inline-flex items-center justify-center w-20 h-20 bg-gradient-to-br from-blue-400 to-purple-600 rounded-full mb-6 shadow-lg">
@@ -755,7 +751,3 @@ const AdminFormBuilder: React.FC = ({selectedForm, setSelectedForm}:any) => {
 };
 
 export default AdminFormBuilder;
-
-// Add to your CSS (or Tailwind config if you use it):
-// .dragging { opacity: 0.5; transform: scale(0.98) rotate(-2deg); transition: all 0.2s; }
-// .drop-target { border: 2px dashed #3b82f6; background: #e0f2fe; transition: all 0.2s; }

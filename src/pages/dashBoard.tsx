@@ -2,34 +2,35 @@
 import { useNavigate } from "react-router-dom";
 import { useAppDispatch, useAppSelector } from "../store/hooks";
 import { addApplication, setSelectedDocuments, setCurrentApplication } from "../slices/formSlice";
-import { KycDocList, KycForm } from "../forms/kycForm";
+import { useState } from "react";
 
-export const DashBoard = ({ SetDocs, setAppForm }: any) => {
+export const DashBoard = () => {
   const navigate = useNavigate();
   const dispatch = useAppDispatch();
   const applications = useAppSelector((state) => state.form.applications);
   const formBuilderData = useAppSelector((state) => state.form.formBuilderData);
-
-  const handleKycApplication = () => {
-    // Create a new KYC application in Redux
-    dispatch(addApplication({ 
-      name: "KYC Application", 
-      description: "Know Your Customer verification process" 
-    }));
-    
-    // Set the selected documents and form data
-    dispatch(setSelectedDocuments(KycDocList));
-    SetDocs(KycDocList);
-    setAppForm(KycForm);
-    navigate("/docs");
-  };
+  const mainJson = useAppSelector((state) => state.form.mainJson);
+  const [applicationsList, setApplicationsList] = useState<any[]>([]);
 
   const handleCustomApplication = (appData: any) => {
-    // Use data from form builder
-    dispatch(setCurrentApplication(appData.id));
-    dispatch(setSelectedDocuments(appData.formFields || []));
-    SetDocs(appData.formFields || []);
-    setAppForm(appData);
+    console.log("Custom Application Data:", appData);
+    
+    // First, create a proper application object and add it to applications array
+    const applicationPayload = {
+      name: appData.fileName || appData.name || "Custom Application",
+      description: appData.description || "Custom form application"
+    };
+    
+    // Add the application to the applications array
+    dispatch(addApplication(applicationPayload));
+    
+    // The addApplication reducer automatically sets the newly created app as currentApplication
+    // So we don't need to call setCurrentApplication separately
+    
+    // Set selected documents
+    dispatch(setSelectedDocuments(appData.formFields || appData.data || []));
+    
+    // Navigate to docs page
     navigate("/docs");
   };
 
@@ -45,20 +46,8 @@ export const DashBoard = ({ SetDocs, setAppForm }: any) => {
       </div>
       
       <div className="flex gap-4 w-full justify-center flex-wrap cursor-pointer">
-        {/* Default KYC Application */}
-        <div
-          onClick={handleKycApplication}
-          className="w-80 h-40 bg-slate-800 hover:bg-slate-700 rounded-md flex justify-center items-center text-xl transition-colors duration-200 shadow-lg hover:shadow-xl"
-        >
-          <div className="text-center">
-            <div className="text-2xl mb-2">📋</div>
-            <div>KYC Application</div>
-            <div className="text-sm text-gray-400 mt-2">Default verification process</div>
-          </div>
-        </div>
-        
         {/* Custom Applications from Form Builder */}
-        {formBuilderData.map((app: any, index: number) => (
+        {mainJson.map((app: any, index: number) => (
           <div
             key={index}
             onClick={() => handleCustomApplication(app)}
@@ -68,47 +57,32 @@ export const DashBoard = ({ SetDocs, setAppForm }: any) => {
               <div className="text-2xl mb-2">⚙️</div>
               <div>{app.fileName || app.name}</div>
               <div className="text-sm text-gray-300 mt-2">
-                {app.formFields?.length || 0} fields
+                {app.formFields?.length || app.data?.length || 0} fields
               </div>
             </div>
           </div>
         ))}
         
-        {/* Create New Application Button */}
-        <div
-          onClick={() => navigate("/form")}
-          className="w-80 h-40 bg-gradient-to-br from-green-800 to-teal-800 hover:from-green-700 hover:to-teal-700 rounded-md flex justify-center items-center text-xl transition-all duration-200 shadow-lg hover:shadow-xl cursor-pointer border-2 border-dashed border-green-600"
-        >
-          <div className="text-center">
-            <div className="text-3xl mb-2">➕</div>
-            <div>Create New</div>
-            <div className="text-sm text-gray-300 mt-2">Build custom form</div>
-          </div>
-        </div>
-      </div>
-      
-      {/* Recent Applications Section */}
-      {applications.length > 0 && (
-        <div className="max-w-6xl mx-auto">
-          <h2 className="text-2xl font-bold mb-6 text-center">Recent Applications</h2>
-          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
-            {applications.slice(-6).map((app: any) => (
-              <div key={app.id} className="bg-slate-800 rounded-lg p-4 hover:bg-slate-700 transition-colors">
-                <h3 className="text-lg font-semibold">{app.name}</h3>
-                <p className="text-gray-400 text-sm">{app.description}</p>
-                <div className="flex justify-between items-center mt-3">
-                  <span className="text-xs text-gray-500">
-                    {new Date(app.createdAt).toLocaleDateString()}
-                  </span>
-                  <span className="text-xs bg-blue-600 px-2 py-1 rounded">
-                    {app.data.length} fields
-                  </span>
-                </div>
+        {/* Existing Applications
+        {applications.map((app: any, index: number) => (
+          <div
+            key={`existing-${index}`}
+            onClick={() => {
+              dispatch(setCurrentApplication(app.id));
+              navigate("/docs");
+            }}
+            className="w-80 h-40 bg-gradient-to-br from-blue-800 to-indigo-800 hover:from-blue-700 hover:to-indigo-700 rounded-md flex justify-center items-center text-xl transition-all duration-200 shadow-lg hover:shadow-xl cursor-pointer"
+          >
+            <div className="text-center">
+              <div className="text-2xl mb-2">📋</div>
+              <div>{app.name}</div>
+              <div className="text-sm text-gray-300 mt-2">
+                {app.data?.length || 0} fields
               </div>
-            ))}
+            </div>
           </div>
-        </div>
-      )}
+        ))} */}
+      </div>
     </div>
   );
 };

@@ -2,6 +2,8 @@
 import { useEffect, useState } from "react";
 import { DocumentProcessor } from "../pages/documentProcessor";
 import { useNavigate } from "react-router-dom";
+import useApp from "antd/es/app/useApp";
+import { useAppSelector } from "../store/hooks";
 
 interface StreamingCallback {
   (chunk: any, done: boolean): void;
@@ -76,24 +78,45 @@ async function handleExecutionStreaming(
   return readStream();
 }
 
-export const DocProcessor = ({ FileJson, setResult, setFileDataMain }: any) => {
-  // const [fileJsonData, setFileJsonData] = useState(FileJson);
+export const DocProcessor = ({setResult, setFileDataMain}:any) => {
+  // Get current application and related data from Redux
+  const currentApplication = useAppSelector((state) => state.form.currentApplication);
+  const selectedDocuments = useAppSelector((state) => state.form.selectedDocuments);
+  const mainJson = useAppSelector((state) => state.form.mainJson);
+  
+  console.log("Current Application:", currentApplication);
+  console.log("Selected Documents:", selectedDocuments);
+  console.log("Main JSON:", mainJson);
+  
   const [fileData, setFileData] = useState<any>(null);
   const [allFiles, setAllFiles] = useState<any>([]);
   const [files, setFiles] = useState<any>([]);
-
   const [isUploading, setIsUploading] = useState(false);
   const [error, setError] = useState<string | null>(null);
-  // const [result, setResult] = useState<any | null>(null);
-  //   const [isDragging, setIsDragging] = useState(false);
-  //   const inputRef = useRef<HTMLInputElement | null>(null);
-  const navigate = useNavigate();
   const [loading, setLoading] = useState(false);
 
+  const navigate = useNavigate();
+
+  // Set up files based on current application data
   useEffect(() => {
-    setFiles(FileJson);
-    setAllFiles((prev: any[]) => (fileData ? [...prev, fileData] : prev));
-  }, [FileJson, fileData]);
+    if (currentApplication) {
+      // Use the application's form fields as the files to process
+      setFiles(currentApplication.data || []);
+    } else if (selectedDocuments.length > 0) {
+      // Fallback to selected documents
+      setFiles(selectedDocuments);
+    } else {
+      // Redirect back to dashboard if no application is selected
+      navigate("/");
+    }
+  }, [currentApplication, selectedDocuments, navigate]);
+
+  // Update allFiles when fileData changes
+  useEffect(() => {
+    if (fileData) {
+      setAllFiles((prev: any[]) => [...prev, fileData]);
+    }
+  }, [fileData]);
 
   const getExecutePipeline = async (
     textInput: string,
@@ -121,7 +144,6 @@ export const DocProcessor = ({ FileJson, setResult, setFileDataMain }: any) => {
       handleExecutionStreaming(formData, (chunk: any, done: any) => {
         if (chunk) {
           lastChunk = chunk;
-
           console.log("CHUNKKK", lastChunk);
         }
 
@@ -141,7 +163,6 @@ export const DocProcessor = ({ FileJson, setResult, setFileDataMain }: any) => {
     if (loading || isUploading) return; // Prevent multiple submissions
     setLoading(true);
     setError(null);
-    // setResult(null);
 
     try {
       setIsUploading(true);
@@ -152,9 +173,9 @@ export const DocProcessor = ({ FileJson, setResult, setFileDataMain }: any) => {
         const parsedData = JSON.parse(res["outputNode-1"].raw);
         aggregatedResults.push(parsedData);
       }
-      setResult(aggregatedResults);
       setLoading(false);
-      setFileDataMain(allFiles)
+      setResult(aggregatedResults);
+      setFileDataMain(allFiles);
       navigate("/analysis");
     } catch (err) {
       const message = err instanceof Error ? err.message : "Upload failed";
@@ -165,13 +186,36 @@ export const DocProcessor = ({ FileJson, setResult, setFileDataMain }: any) => {
     }
   }
 
+  // Show loading or error state if no application data
+  if (!currentApplication && selectedDocuments.length === 0) {
+    return (
+      <div className="w-screen flex flex-col gap-10 pt-20 justify-center items-center">
+        <div className="text-xl text-red-500">No application selected</div>
+        <button 
+          onClick={() => navigate("/")}
+          className="px-4 py-2 bg-blue-600 text-white rounded"
+        >
+          Back to Dashboard
+        </button>
+      </div>
+    );
+  }
+
+  console.log("Rendering DocProcessor with files:", files, allFiles);
+
   return (
     <div className="w-screen flex flex-col gap-10 pt-20 justify-center items-center">
-      <div className="flex justify-center w-full text-3xl font-bold">
-        Upload all the Documents
+      <div className="flex flex-col items-center gap-2">
+        <div className="text-3xl font-bold">Upload all the Documents</div>
+        {currentApplication && (
+          <div className="text-lg text-gray-600">
+            Application: {currentApplication.name}
+          </div>
+        )}
       </div>
+      
       <div className="flex flex-wrap w-full justify-center items-center gap-4">
-        {files.map((item: any, index: number) => (
+        {selectedDocuments.map((item: any, index: number) => (
           <div key={index} className="w-1/3">
             <DocumentProcessor
               Data={item}
@@ -182,15 +226,19 @@ export const DocProcessor = ({ FileJson, setResult, setFileDataMain }: any) => {
           </div>
         ))}
       </div>
+      
       <div className="flex items-center gap-4">
         <button
           onClick={handleSubmit}
-          disabled={loading || isUploading}
+          disabled={loading || isUploading || allFiles.length === 0}
           className="px-4 py-2 bg-blue-600 text-white rounded disabled:opacity-50"
         >
           {loading || isUploading ? "Processing..." : "Process Files"}
         </button>
         {error && <span className="text-red-600 text-sm">{error}</span>}
+        {allFiles.length === 0 && (
+          <span className="text-yellow-600 text-sm">Please upload at least one file</span>
+        )}
       </div>
     </div>
   );

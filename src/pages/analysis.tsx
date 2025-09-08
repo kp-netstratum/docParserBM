@@ -10,10 +10,12 @@ export const Analysis = ({ data, fileData, appForm }: any) => {
   const dispatch = useAppDispatch();
   const currentApplication = useAppSelector((state) => state.form.currentApplication);
   const selectedDocuments = useAppSelector((state) => state.form.selectedDocuments);
-  
+
   const [openModal, setOpenModal] = useState(false);
   const [selectedFile, setSelectedFile] = useState<any>(null);
   const [analysisResults, setAnalysisResults] = useState<any>(null);
+
+  console.log(data, fileData, appForm, "analysis props");
 
   // Save analysis results to Redux when available
   useEffect(() => {
@@ -25,7 +27,6 @@ export const Analysis = ({ data, fileData, appForm }: any) => {
   }, [data, currentApplication, dispatch]);
 
   // Handle escape key to close modal
-  console.log("data", data?.[0]?.fileName, fileData);
   useEffect(() => {
     const handleEscapeKey = (event: KeyboardEvent) => {
       if (event.key === "Escape" && openModal) {
@@ -56,35 +57,45 @@ export const Analysis = ({ data, fileData, appForm }: any) => {
       closeModal();
     }
   };
+
   const displayData = data || analysisResults;
   const displayForm = appForm || currentApplication;
   
   return displayData ? (
-    <div className=" space-y-10 flex h-[100vh] sm:flex-row flex-col bg-gradient-to-br from-[#0f172a] to-[#1e293b] overflow-auto">
+    <div className="space-y-10 flex h-[100vh] sm:flex-row flex-col bg-gradient-to-br from-[#0f172a] to-[#1e293b] overflow-auto">
       {/* Application Info Header */}
       {displayForm && (
         <div className="absolute top-4 left-4 bg-slate-800 rounded-lg p-3 shadow-lg z-10">
-          <h3 className="text-white font-semibold">{displayForm.name || displayForm.fileName}</h3>
-          <p className="text-gray-300 text-sm">{displayForm.description || 'Custom Application'}</p>
+          <h3 className="text-white font-semibold">
+            {displayForm.name || 
+             displayForm.fileName || 
+             (Array.isArray(displayForm) && displayForm[0]?.fileName) ||
+             'Document Analysis'}
+          </h3>
+          <p className="text-gray-300 text-sm">
+            {displayForm.description || 
+             (Array.isArray(displayForm) && displayForm[0]?.fileType) ||
+             'Custom Application'}
+          </p>
         </div>
       )}
       
-      <div className="w-1/2 flex items-center justify-center h-full m-0 gap-4 flex-wrap">
-        {/* <Preview fileData={fileData} /> */}
+      <div className="w-full sm:w-1/2 flex items-center justify-center h-full m-0 gap-4 flex-wrap">
         {fileData?.map((file: any) => (
           <div
             onClick={() => {
               setOpenModal(true);
               setSelectedFile(file);
             }}
-            key={file.fileName}
+            key={file.fileName || file.name}
             className="text-white bg-slate-700 hover:bg-slate-600 p-4 rounded-md flex w-48 items-center gap-2 transition-colors cursor-pointer shadow-lg hover:shadow-xl"
           >
-            <FileIcon name={file.name} type={file.type} size={30}/>
+            <FileIcon name={file.name} type={file.type} size={30} />
             <span className="truncate">{file.name}</span>
           </div>
-        )) || []}
-        {openModal && (
+        ))}
+        
+        {openModal && selectedFile && (
           <div
             className="fixed inset-0 bg-black bg-opacity-50 flex justify-center items-center z-50"
             onClick={handleBackdropClick}
@@ -99,10 +110,10 @@ export const Analysis = ({ data, fileData, appForm }: any) => {
                   viewBox="0 0 24 24"
                   fill="none"
                   stroke="#fb4646"
-                  stroke-width="2"
-                  stroke-linecap="round"
-                  stroke-linejoin="round"
-                  className="lucide lucide-x-icon lucide-x"
+                  strokeWidth="2"
+                  strokeLinecap="round"
+                  strokeLinejoin="round"
+                  className="lucide lucide-x-icon lucide-x cursor-pointer"
                 >
                   <path d="M18 6 6 18" />
                   <path d="m6 6 12 12" />
@@ -113,7 +124,8 @@ export const Analysis = ({ data, fileData, appForm }: any) => {
           </div>
         )}
       </div>
-      <div className="w-1/2">
+      
+      <div className="w-full sm:w-1/2">
         <Analyzer appForm={displayForm} data={displayData} />
       </div>
     </div>

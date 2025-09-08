@@ -46,6 +46,7 @@ const formSlice = createSlice({
   initialState,
   reducers: {
     addApplication: (state, action: PayloadAction<{ name: string; description: string }>) => {
+      console.log(action.payload, 'payload in add application');
       const newApp: Application = {
         id: `app_${Date.now()}_${Math.random().toString(36).substr(2, 9)}`,
         name: action.payload.name,
@@ -74,6 +75,8 @@ const formSlice = createSlice({
       }
     },
     setCurrentApplication: (state, action: PayloadAction<string | null>) => {
+      console.log(action.payload, 'payload in set current application');
+      
       if (action.payload === null) {
         state.currentApplication = null;
       } else {

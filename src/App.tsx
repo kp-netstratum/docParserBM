@@ -13,9 +13,10 @@ import { Admin } from "./pages/admin";
 function App() {
   const [uploadResult, setUploadResult] = useState<any | null>(null);
   const [fileDataMain, setFileDataMain] = useState<any>(null);
-  const [docList, setDocList] = useState<any>([]);
-  const [appForm, setAppForm] = useState<any>();
+  // const [docList, setDocList] = useState<any>([]);
+  // const [appForm, setAppForm] = useState<any>();
 
+  console.log("App render", uploadResult, fileDataMain);
   
 
   return (
@@ -26,14 +27,14 @@ function App() {
             <Routes>
               <Route
                 path="/"
-                element={<DashBoard SetDocs={setDocList} setAppForm={setAppForm} />}
+                element={<DashBoard/>}
               />
               <Route path="/admin" element={<Admin />} />
               <Route
                 path="/docs"
                 element={
                   <DocProcessor
-                    FileJson={docList}
+                    // FileJson={docList}
                     setResult={setUploadResult}
                     setFileDataMain={setFileDataMain}
                   />
@@ -45,7 +46,7 @@ function App() {
                   <Analysis
                     data={uploadResult ?? null}
                     fileData={fileDataMain}
-                    appForm={appForm}
+                    // appForm={appForm}
                   />
                 }
               />

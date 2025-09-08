@@ -53,7 +53,7 @@ export const Analysis = ({ data, fileData, appForm }: any) => {
             key={file.fileName}
             className="text-white bg-slate-700 p-4 rounded-md flex w-48 items-center gap-2"
           >
-            <FileIcon name={file.name} type={file.type} />
+            <FileIcon name={file.name} type={file.type} size={30}/>
             <span className="truncate">{file.name}</span>
           </div>
         ))}

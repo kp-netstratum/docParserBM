@@ -1,3 +1,4 @@
+/* eslint-disable @typescript-eslint/no-explicit-any */
 import { createSlice } from '@reduxjs/toolkit';
 import type { PayloadAction } from '@reduxjs/toolkit';
 
@@ -101,6 +102,7 @@ const formSlice = createSlice({
       state.formBuilderData = action.payload;
     },
     addFormBuilderDocument: (state, action: PayloadAction<any>) => {
+      console.log(action.payload, 'qwertyu')
       state.formBuilderData.push(action.payload);
     },
     updateFormBuilderDocument: (state, action: PayloadAction<{ index: number; data: any }>) => {

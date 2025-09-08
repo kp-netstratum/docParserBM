@@ -8,7 +8,7 @@ import { Analysis } from "./pages/analysis";
 import { DashBoard } from "./pages/dashBoard";
 import { DocProcessor } from "./components/docProcessor";
 import { Admin } from "./pages/admin";
-import AdminFormBuilder from "./pages/adminFormBuilder";
+// import AdminFormBuilder from "./pages/adminFormBuilder";
 
 function App() {
   const [uploadResult, setUploadResult] = useState<any | null>(null);
@@ -29,7 +29,6 @@ function App() {
                 element={<DashBoard SetDocs={setDocList} setAppForm={setAppForm} />}
               />
               <Route path="/admin" element={<Admin />} />
-              <Route path="/form" element={<AdminFormBuilder />} />
               <Route
                 path="/docs"
                 element={

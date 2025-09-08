@@ -16,7 +16,6 @@ import {
   Download,
   FileText,
   CreditCard,
-  
   GripVertical,
   Sparkles,
   Move,
@@ -169,7 +168,7 @@ const Field: React.FC<FieldProps> = ({
   );
 };
 
-const AdminFormBuilder: React.FC = () => {
+const AdminFormBuilder: React.FC = ({selectedForm, setSelectedForm}:any) => {
   const dispatch = useAppDispatch();
   const formJson = useAppSelector((s) => s.form.mainJson);
   const formBuilderData = useAppSelector((s) => s.form.formBuilderData);
@@ -213,11 +212,11 @@ const AdminFormBuilder: React.FC = () => {
     formFields: [],
   });
 
-  const [JsonOutput, setJsonOutput] = useState<any>([]);
+  // const [JsonOutput, setJsonOutput] = useState<any>([]);
 
-  useEffect(() => {
-    setJsonOutput(formJson);
-  }, [formJson]);
+  // useEffect(() => {
+  //   setJsonOutput(formJson);
+  // }, [formJson]);
 
   // Sync local documents state with Redux on mount
   // useEffect(() => {
@@ -226,7 +225,7 @@ const AdminFormBuilder: React.FC = () => {
   //   }
   // }, [formBuilderData]);
 
-  console.log(formJson, formBuilderData, formBuilderData)
+  console.log(formJson, formBuilderData, formBuilderData, selectedForm, '1234567890')
 
   const addDocument = (): void => {
     if (newDocument.fileName.trim()) {
@@ -234,8 +233,8 @@ const AdminFormBuilder: React.FC = () => {
       setDocuments(updatedDocuments);
       
       // Dispatch to Redux for persistence
-      dispatch(addFormBuilderDocument({ ...newDocument }));
-      dispatch(setMainJson([...(formJson ?? []), { ...newDocument }] as any));
+      // dispatch(addFormBuilderDocument({ ...newDocument }));
+      // dispatch(setMainJson([...(formJson ?? []), { ...newDocument }] as any));
       
       setNewDocument({
         fileName: "",
@@ -357,7 +356,10 @@ const AdminFormBuilder: React.FC = () => {
         ) as Omit<FormField, "id">
       ),
     }));
-    console.log("Generated JSON:", cleanDocuments, JsonOutput);
+    const data = selectedForm
+    data.data = cleanDocuments
+    console.log(data, '22222222222222')
+    setSelectedForm(data)
     return JSON.stringify(cleanDocuments, null, 2);
   };
 

@@ -6,16 +6,17 @@ import { Preview } from "../components/preview";
 import FileIcon from "../components/fileIcon";
 import { Analyzer } from "../components/analyzer";
 
-export const Analysis = ({ data, fileData, appForm }: any) => {
+export const Analysis = ({ data, fileData }: any) => {
   const dispatch = useAppDispatch();
   const currentApplication = useAppSelector((state) => state.form.currentApplication);
   const selectedDocuments = useAppSelector((state) => state.form.selectedDocuments);
+    // const selectedDocuments = useAppSelector((state) => state.form.selectedDocuments);
 
   const [openModal, setOpenModal] = useState(false);
   const [selectedFile, setSelectedFile] = useState<any>(null);
   const [analysisResults, setAnalysisResults] = useState<any>(null);
 
-  console.log(data, fileData, appForm, "analysis props");
+  console.log(data, fileData, selectedDocuments, "analysis props");
 
   // Save analysis results to Redux when available
   useEffect(() => {
@@ -59,12 +60,12 @@ export const Analysis = ({ data, fileData, appForm }: any) => {
   };
 
   const displayData = data || analysisResults;
-  const displayForm = appForm || currentApplication;
+  const displayForm = selectedDocuments;
   
   return displayData ? (
     <div className="space-y-10 flex h-[100vh] sm:flex-row flex-col bg-gradient-to-br from-[#0f172a] to-[#1e293b] overflow-auto">
       {/* Application Info Header */}
-      {displayForm && (
+      {/* {displayForm && (
         <div className="absolute top-4 left-4 bg-slate-800 rounded-lg p-3 shadow-lg z-10">
           <h3 className="text-white font-semibold">
             {displayForm.name || 
@@ -78,7 +79,7 @@ export const Analysis = ({ data, fileData, appForm }: any) => {
              'Custom Application'}
           </p>
         </div>
-      )}
+      )} */}
       
       <div className="w-full sm:w-1/2 flex items-center justify-center h-full m-0 gap-4 flex-wrap">
         {fileData?.map((file: any) => (

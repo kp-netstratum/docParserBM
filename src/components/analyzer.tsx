@@ -11,15 +11,19 @@ export const Analyzer = ({ data, appForm }: any) => {
     (state) => state.form.selectedDocuments
   );
 
-  const initialForm: FormFieldDefinition[] = useMemo(() => {
-    // Ensure appForm is an array, if not return empty array
-    if (Array.isArray(appForm)) {
-      return appForm as FormFieldDefinition[];
-    } else if (appForm?.data && Array.isArray(appForm.data)) {
-      return appForm.data as FormFieldDefinition[];
-    }
-    return [];
-  }, [appForm]);
+const initialForm: FormFieldDefinition[] = useMemo(() => {
+  if (Array.isArray(appForm)) {
+    // Flatten all formFields into one list
+    return appForm.flatMap((item: any) =>
+      Array.isArray(item.formFields) ? item.formFields : []
+    );
+  } else if (appForm?.formFields && Array.isArray(appForm.formFields)) {
+    // If it's a single object with formFields
+    return appForm.formFields as FormFieldDefinition[];
+  }
+  return [];
+}, [appForm]);
+
 
   const [formData, setFormData] = useState<FormFieldDefinition[]>(initialForm);
 
@@ -37,7 +41,7 @@ export const Analyzer = ({ data, appForm }: any) => {
   }, [data]);
 
   useEffect(() => {
-    if (initialForm.length > 0) {
+    if (initialForm.length >= 0) {
       setFormData(initialForm);
     }
   }, [initialForm]);
@@ -94,10 +98,10 @@ export const Analyzer = ({ data, appForm }: any) => {
         </div>
         <div className="max-w-3xl w-full mx-auto px-4">
           {/* Show document info */}
-          <DocumentInfoDisplay
+          {/* <DocumentInfoDisplay
             selectedDocuments={selectedDocuments}
             data={mergedData}
-          />
+          /> */}
 
           {formData.length >= 0 ? (
             <FormBuilder

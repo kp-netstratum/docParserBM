@@ -433,9 +433,6 @@ const AdminFormBuilder: React.FC = ({selectedForm, setSelectedForm}:any) => {
     <div className="min-h-screen bg-gradient-to-br from-slate-900 to-blue-900 relative overflow-hidden w-full text-black">
       <div className="relative z-10 p-6">
         <div className="max-w-7xl mx-auto flex flex-col items-center text-center my-12">
-          <div className="inline-flex items-center justify-center w-20 h-20 bg-gradient-to-br from-blue-400 to-purple-600 rounded-full mb-6 shadow-lg">
-            <Sparkles className="w-10 h-10 text-white animate-pulse" />
-          </div>
           <h1 className="text-6xl font-bold bg-gradient-to-r from-white to-blue-200 bg-clip-text text-transparent mb-4 animate-fade-in">
             KYC Form Builder
           </h1>
@@ -449,7 +446,7 @@ const AdminFormBuilder: React.FC = ({selectedForm, setSelectedForm}:any) => {
           <button
             onClick={() => setShowDocumentModal(true)}
             className="group relative bg-gradient-to-r from-blue-600 to-purple-600 hover:from-blue-700 hover:to-purple-700 
-                         text-white px-10 py-5 rounded-2xl font-bold shadow-2xl hover:shadow-blue-500/25
+                         text-white px-10 py-5 rounded-md font-bold shadow-2xl hover:shadow-blue-500/25
                          transform hover:scale-105 transition-all duration-300 ease-out
                          flex items-center gap-3 mx-auto overflow-hidden"
           >
@@ -467,11 +464,11 @@ const AdminFormBuilder: React.FC = ({selectedForm, setSelectedForm}:any) => {
         {showDocumentModal && (
           <div className="fixed inset-0 bg-black/60 backdrop-blur-sm flex items-center justify-center z-50 p-4">
             <div
-              className="bg-white/95 backdrop-blur-md rounded-3xl p-8 w-full max-w-lg mx-4 
+              className="bg-white/95 backdrop-blur-md rounded-md p-8 w-full max-w-lg mx-4 
                               shadow-2xl border border-white/20 animate-scale-in"
             >
               <div className="flex items-center gap-3 mb-6">
-                <div className="w-12 h-12 bg-gradient-to-br from-blue-500 to-purple-600 rounded-full flex items-center justify-center">
+                <div className="w-12 h-12 bg-blue-900 rounded-full flex items-center justify-center">
                   <Plus className="w-6 h-6 text-white" />
                 </div>
                 <h3 className="text-2xl font-bold text-gray-800">
@@ -496,7 +493,7 @@ const AdminFormBuilder: React.FC = ({selectedForm, setSelectedForm}:any) => {
                               fileName: docType.label,
                             })
                           }
-                          className={`p-4 border-2 rounded-xl flex flex-col items-center gap-3 
+                          className={`p-4 border-2 rounded-md flex flex-col items-center gap-3 
                                        transition-all duration-200 hover:scale-105 ${
                                          newDocument.fileName === docType.label
                                            ? "border-blue-500 bg-blue-50 shadow-lg shadow-blue-500/20"
@@ -504,7 +501,7 @@ const AdminFormBuilder: React.FC = ({selectedForm, setSelectedForm}:any) => {
                                        }`}
                         >
                           <IconComponent className="w-8 h-8 text-gray-600" />
-                          <span className="text-sm font-semibold">
+                          <span className="text-sm">
                             {docType.label}
                           </span>
                         </button>
@@ -521,7 +518,7 @@ const AdminFormBuilder: React.FC = ({selectedForm, setSelectedForm}:any) => {
                     type="text"
                     value={newDocument.fileName}
                     onChange={handleDocumentNameChange}
-                    className="w-full p-4 border-2 border-gray-300 rounded-xl focus:outline-none 
+                    className="w-full px-4 py-2 border-2 border-gray-300 rounded-md focus:outline-none 
                                 focus:border-blue-500 focus:ring-4 focus:ring-blue-100 
                                 transition-all duration-200 bg-white/50"
                     placeholder="e.g., Passport, ID Card"
@@ -546,7 +543,7 @@ const AdminFormBuilder: React.FC = ({selectedForm, setSelectedForm}:any) => {
               <div className="flex gap-4 mt-8">
                 <button
                   onClick={() => setShowDocumentModal(false)}
-                  className="flex-1 px-6 py-3 border-2 border-gray-300 text-gray-700 rounded-xl 
+                  className="flex-1 px-6 py-3 border-2 border-gray-300 text-gray-700 rounded-md 
                               hover:bg-gray-50 hover:border-gray-400 transition-all duration-200"
                 >
                   Cancel
@@ -555,7 +552,7 @@ const AdminFormBuilder: React.FC = ({selectedForm, setSelectedForm}:any) => {
                   onClick={addDocument}
                   disabled={!newDocument.fileName.trim()}
                   className="flex-1 px-6 py-3 bg-gradient-to-r from-blue-600 to-purple-600 text-white 
-                              rounded-xl hover:from-blue-700 hover:to-purple-700 disabled:opacity-50 
+                              rounded-md hover:from-blue-700 hover:to-purple-700 disabled:opacity-50 
                               disabled:cursor-not-allowed transition-all duration-200 font-semibold
                               shadow-lg hover:shadow-xl"
                 >
@@ -571,7 +568,7 @@ const AdminFormBuilder: React.FC = ({selectedForm, setSelectedForm}:any) => {
           {documents.map((doc, index) => (
             <div
               key={index}
-              className="group bg-white/10 backdrop-blur-md rounded-2xl shadow-xl p-8 
+              className="group bg-white/10 backdrop-blur-md rounded-md shadow-xl p-8 
                               hover:shadow-2xl hover:shadow-blue-500/20 transition-all duration-300 
                               hover:scale-105 border border-white/20 animate-slide-up"
               style={{ animationDelay: `${index * 100}ms` }}
@@ -598,7 +595,7 @@ const AdminFormBuilder: React.FC = ({selectedForm, setSelectedForm}:any) => {
 
               <button
                 onClick={() => openFieldBuilder(index)}
-                className="w-full bg-white/20 hover:bg-white/30 text-white py-3 px-6 rounded-xl 
+                className="w-full bg-white/20 hover:bg-white/30 text-white py-3 px-6 rounded-md 
                             transition-all duration-200 font-semibold backdrop-blur-sm
                             hover:shadow-lg border border-white/30"
               >
@@ -612,7 +609,7 @@ const AdminFormBuilder: React.FC = ({selectedForm, setSelectedForm}:any) => {
         {showFieldBuilder && selectedDocument !== null && (
           <div className="fixed inset-0 bg-black/60 backdrop-blur-sm flex items-center justify-center z-50 p-4">
             <div
-              className="bg-white/95 backdrop-blur-md rounded-3xl w-full max-w-7xl max-h-[90vh] 
+              className="bg-white/95 backdrop-blur-md rounded-md w-full max-w-7xl max-h-[90vh] 
                               overflow-hidden flex shadow-2xl border border-white/20 animate-scale-in"
             >
               {/* Enhanced field types panel */}
@@ -625,7 +622,7 @@ const AdminFormBuilder: React.FC = ({selectedForm, setSelectedForm}:any) => {
                     <button
                       key={fieldType.id}
                       onClick={() => addField(fieldType)}
-                      className="bg-white/80 p-4 rounded-xl shadow-md cursor-pointer 
+                      className="bg-white/80 p-4 rounded-md shadow-md cursor-pointer 
                                   hover:shadow-lg hover:scale-105 transition-all duration-200 
                                   flex items-center gap-3 w-full border border-gray-100
                                   hover:border-blue-300 group animate-slide-up"
@@ -646,10 +643,7 @@ const AdminFormBuilder: React.FC = ({selectedForm, setSelectedForm}:any) => {
               <div className="flex-1 p-8 overflow-y-auto">
                 <div className="flex justify-between items-center mb-8">
                   <div className="flex items-center gap-3">
-                    <div className="w-10 h-10 bg-gradient-to-br from-blue-500 to-purple-600 rounded-full flex items-center justify-center">
-                      <Move className="w-5 h-5 text-white" />
-                    </div>
-                    <h3 className="text-2xl font-bold text-gray-800">
+                    <h3 className="text-2xl font-semibold text-gray-800">
                       {documents[selectedDocument].fileName} - Form Fields
                     </h3>
                   </div>

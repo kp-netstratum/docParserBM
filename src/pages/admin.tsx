@@ -70,12 +70,22 @@ export const Admin = () => {
         <div className="w-full flex flex-col justify-center items-center text-white">
           <div className="flex items-center relative justify-between w-full max-w-4xl p-4">
             <h1 className="text-2xl font-bold mb-4">Admin Page</h1>
-            <button
-              onClick={() => setShowForm(true)}
-              className="bg-blue-500 hover:bg-blue-600 text-white px-4 py-2 rounded mt-2 mb-4 cursor-pointer transition-colors"
-            >
-              Create New Application
-            </button>
+            <div className="flex gap-4">
+              <button
+                onClick={() => setShowForm(true)}
+                className="bg-blue-500 hover:bg-blue-600 text-white px-4 py-2 rounded mt-2 mb-4 cursor-pointer transition-colors"
+              >
+                Create New Application
+              </button>
+              <button
+                onClick={() => {
+                  window.location.href = "/";
+                }}
+                className="bg-blue-500 hover:bg-blue-600 text-white px-4 py-2 rounded mt-2 mb-4 cursor-pointer transition-colors"
+              >
+                back
+              </button>
+            </div>
           </div>
 
           {showform && (

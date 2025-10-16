@@ -40,7 +40,7 @@ export const DashBoard = () => {
 
   return (
     <div className="flex flex-col gap-20 pt-20">
-      <div className="flex w-full justify-between px-96">
+      <div className="flex w-full justify-between md:px-40 xl:px-96 px-10">
         <div className="flex flex-col items-start justify-start gap-4">
           <div className="flex justify-center text-3xl font-bold">
             Dashboard
@@ -50,29 +50,39 @@ export const DashBoard = () => {
           </div>
         </div>
         <div
-        onClick={()=>{navigate('/admin')}} 
-        className="py-2 px-4 bg-slate-700 rounded-md h-10 flex justify-center items-center cursor-pointer">
+          onClick={() => {
+            navigate("/admin");
+          }}
+          className="py-2 px-4 bg-slate-700 rounded-md h-10 flex justify-center items-center cursor-pointer"
+        >
           Admin
         </div>
       </div>
 
       <div className="flex gap-4 w-full justify-center flex-wrap cursor-pointer">
         {/* Custom Applications from Form Builder */}
-        {mainJson.map((app: any, index: number) => (
-          <div
-            key={index}
-            onClick={() => handleCustomApplication(app)}
-            className="w-80 h-40 bg-gradient-to-br from-purple-800 to-blue-800 hover:from-purple-700 hover:to-blue-700 rounded-md flex justify-center items-center text-xl transition-all duration-200 shadow-lg hover:shadow-xl cursor-pointer"
-          >
-            <div className="text-center">
-              <div className="text-2xl mb-2">⚙️</div>
-              <div>{app.fileName || app.name}</div>
-              <div className="text-sm text-gray-300 mt-2">
-                {app.formFields?.length || app.data?.length || 0} fields
+
+        {mainJson.length > 0 ? (
+          mainJson.map((app: any, index: number) => (
+            <div
+              key={index}
+              onClick={() => handleCustomApplication(app)}
+              className="w-80 h-40 bg-gradient-to-br from-purple-800 to-blue-800 hover:from-purple-700 hover:to-blue-700 rounded-md flex justify-center items-center text-xl transition-all duration-200 shadow-lg hover:shadow-xl cursor-pointer"
+            >
+              <div className="text-center">
+                <div className="text-2xl mb-2">⚙️</div>
+                <div>{app.fileName || app.name}</div>
+                <div className="text-sm text-gray-300 mt-2">
+                  {app.formFields?.length || app.data?.length || 0} fields
+                </div>
               </div>
             </div>
+          ))
+        ) : (
+          <div className="text-gray-400 pt-20">
+            No custom applications available. Please create one in Admin.
           </div>
-        ))}
+        )}
 
         {/* Existing Applications
         {applications.map((app: any, index: number) => (
